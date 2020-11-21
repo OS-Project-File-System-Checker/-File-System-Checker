@@ -182,6 +182,34 @@ int err5(int fsfd){
 }
 
 
+int err12(int fsfd){
+  uchar buf[BSIZE];
+	rsect(SUPERBLOCK,buf);
+	memmove(&sb, buf, sizeof(sb));
+
+  int inum = 1;
+  struct dinode current_inode;
+
+  if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+	  perror("lseek");
+    exit(1);
+	}
+	if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+	  perror("read");
+    exit(1);
+	}
+
+  memmove(&current_inode, buf, sizeof(current_inode));
+  current_inode.type = T_DIR;
+  current_inode.nlink = T_ERR;
+  write(fsfd,&current_inode,sizeof(current_inode));
+  
+  printf("Changed the type of an inode to directory inode and changed the number of links to greater than 1");
+
+  return 1;
+}
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
