@@ -134,6 +134,30 @@ int err4(fsfd){
   return 1;
 }
 
+int err5(fsfd){
+  uint buf2;
+  rinode(10,&inode1);
+  uint bmapbyte;
+    
+  int inodeaddr = inode1.addrs[1]/4;
+  
+  if(lseek(fsfd, sb.bmapstart*BSIZE + inodeaddr, 0) != sb.bmapstart * BSIZE  + inodeaddr){
+    perror("lseek");
+    exit(1);
+  }
+  
+  uint a = 0;
+
+  if (write(fsfd,&a,1) != 1){
+    perror("write");
+    exit(1);
+  }
+  
+  printf("Used inode marked free in bitmap");
+  return 1;
+
+}
+
 
 
 
