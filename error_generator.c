@@ -100,7 +100,7 @@ winode(uint inum, struct dinode *ip)
 
 
 
-int diskinfo(int fsfd) {
+int diskinfo(int fsfd) {        //function that prints the details of the superblock
 
     uchar buf[BSIZE];
     rsect(SUPERBLOCK,buf);
