@@ -15,7 +15,7 @@
 #include "stat.h"
 #include "param.h"
 #define SUPERBLOCK 1
-
+#define T_ERR 4
 
 
 
@@ -118,11 +118,34 @@ int diskinfo(int fsfd) {        //function that prints the details of the superb
 
 ////////////////////////////////////// start errors from here ////////////////////////////////////////////
 
-int err1(fsfd){
-  return 0;
+int err1(int fsfd){
+  uchar buf[BSIZE];
+	rsect(SUPERBLOCK,buf);
+	memmove(&sb, buf, sizeof(sb));
+
+  int inum = 1;
+  struct dinode current_inode;
+
+  if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+	  perror("lseek");
+    exit(1);
+	}
+	if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+	  perror("read");
+    exit(1);
+	}
+
+  memmove(&current_inode, buf, sizeof(current_inode));
+  current_inode.type = T_ERR;
+
+  write(fsfd,&current_inode,sizeof(current_inode));
+  
+  printf("Changed the type of a inode");
+
+  return 1;
 }
 
-int err4(fsfd){
+int err4(int fsfd){
   uint b = 0;
   write(fsfd,&b,1);
 
@@ -134,7 +157,7 @@ int err4(fsfd){
   return 1;
 }
 
-int err5(fsfd){
+int err5(int fsfd){
   uint buf2;
   rinode(10,&inode1);
   uint bmapbyte;
