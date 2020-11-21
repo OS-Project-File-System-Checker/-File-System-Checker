@@ -122,6 +122,19 @@ int err1(fsfd){
   return 0;
 }
 
+int err4(fsfd){
+  uint b = 0;
+  write(fsfd,&b,1);
+
+  if(lseek(fsfd, 59*BSIZE, 0) != 59 * BSIZE){
+        perror("lseek");
+        exit(1);
+  }
+  printf("Removed '.' entry from the root directory");
+  return 1;
+}
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
