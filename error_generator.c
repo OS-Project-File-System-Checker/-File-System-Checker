@@ -219,6 +219,55 @@ int err6(int fsfd){
 
 }
 
+int err9(int fsfd){
+  uchar buf[BSIZE];
+	rsect(SUPERBLOCK,buf);
+	memmove(&sb, buf, sizeof(sb));
+
+  int inum;
+  struct dinode current_inode;
+  for (inum=0; inum<sb.ninodes; inum++){	
+  if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+	  perror("lseek");
+    exit(1);
+	}
+	if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+	  perror("read");
+    exit(1);
+	}
+  memmove(&current_inode, buf, sizeof(current_inode));
+  if (current_inode.type==0){
+    current_inode.type = T_FILE;
+    write(fsfd,&current_inode,sizeof(current_inode));
+    printf("marked a free inode as used Inode");
+    break;}}
+  return 1;
+}
+
+int err10(int fsfd){
+  uchar buf[BSIZE];
+	rsect(SUPERBLOCK,buf);
+	memmove(&sb, buf, sizeof(sb));
+
+  int inum;
+  struct dinode current_inode;
+  for (inum=0; inum<sb.ninodes; inum++){	
+  if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+	  perror("lseek");
+    exit(1);
+	}
+	if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+	  perror("read");
+    exit(1);
+	}
+  memmove(&current_inode, buf, sizeof(current_inode));
+  if (current_inode.type==2){
+    current_inode.type=0;
+    write(fsfd,&current_inode,sizeof(current_inode));
+    printf("marked a used inode as free inode\n");
+    break;}}
+  return 1;
+}
 
 int err12(int fsfd){
     uchar buf[BSIZE];
