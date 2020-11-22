@@ -26,82 +26,81 @@ struct superblock sb;
 ushort
 xshort(ushort x)
 {
-  ushort y;
-  uchar *a = (uchar*)&y;
-  a[0] = x;
-  a[1] = x >> 8;
-  return y;
+    ushort y;
+    uchar *a = (uchar*)&y;
+    a[0] = x;
+    a[1] = x >> 8;
+    return y;
 }
 
 uint
 xint(uint x)
 {
-  uint y;
-  uchar *a = (uchar*)&y;
-  a[0] = x;
-  a[1] = x >> 8;
-  a[2] = x >> 16;
-  a[3] = x >> 24;
-  return y;
+    uint y;
+    uchar *a = (uchar*)&y;
+    a[0] = x;
+    a[1] = x >> 8;
+    a[2] = x >> 16;
+    a[3] = x >> 24;
+    return y;
 }
 
 void
 rsect(uint sec, void *buf)
 {
-  if(lseek(fsfd, sec * BSIZE, 0) != sec * BSIZE){
-    perror("lseek");
-    exit(1);
-  }
-  if(read(fsfd, buf, BSIZE) != BSIZE){
-    perror("read");
-    exit(1);
-  }
+    if(lseek(fsfd, sec * BSIZE, 0) != sec * BSIZE){
+        perror("lseek");
+        exit(1);
+    }
+    if(read(fsfd, buf, BSIZE) != BSIZE){
+        perror("read");
+        exit(1);
+    }
 }
 
 void
 rinode(uint inum, struct dinode *ip)
 {
-  char buf[BSIZE];
-  uint bn;
-  struct dinode *dip;
+    char buf[BSIZE];
+    uint bn;
+    struct dinode *dip;
 
-  bn = IBLOCK(inum, sb);
-  rsect(bn, buf);
-  dip = ((struct dinode*)buf) + (inum % IPB);
-  *ip = *dip;
+    bn = IBLOCK(inum, sb);
+    rsect(bn, buf);
+    dip = ((struct dinode*)buf) + (inum % IPB);
+    *ip = *dip;
 }
 
 void
 wsect(uint sec, void *buf)
 {
-  if(lseek(fsfd, sec * BSIZE, 0) != sec * BSIZE){
-    perror("lseek");
-    exit(1);
-  }
-  if(write(fsfd, buf, BSIZE) != BSIZE){
-    perror("write");
-    exit(1);
-  }
+    if(lseek(fsfd, sec * BSIZE, 0) != sec * BSIZE){
+        perror("lseek");
+        exit(1);
+    }
+    if(write(fsfd, buf, BSIZE) != BSIZE){
+        perror("write");
+        exit(1);
+    }
 }
 
 void
 winode(uint inum, struct dinode *ip)
 {
-  char buf[BSIZE];
-  uint bn;
-  struct dinode *dip;
+    char buf[BSIZE];
+    uint bn;
+    struct dinode *dip;
 
-  bn = IBLOCK(inum, sb);
-  rsect(bn, buf);
-  dip = ((struct dinode*)buf) + (inum % IPB);
-  *dip = *ip;
-  wsect(bn, buf);
+    bn = IBLOCK(inum, sb);
+    rsect(bn, buf);
+    dip = ((struct dinode*)buf) + (inum % IPB);
+    *dip = *ip;
+    wsect(bn, buf);
 }
 
 
 
 int diskinfo(int fsfd) {        //function that prints the details of the superblock
-
     uchar buf[BSIZE];
     rsect(SUPERBLOCK,buf);
     memmove(&sb, buf, sizeof(sb));
@@ -119,100 +118,146 @@ int diskinfo(int fsfd) {        //function that prints the details of the superb
 ////////////////////////////////////// start errors from here ////////////////////////////////////////////
 
 int err1(int fsfd){
-  uchar buf[BSIZE];
-	rsect(SUPERBLOCK,buf);
-	memmove(&sb, buf, sizeof(sb));
+    uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
 
-  int inum = 1;
-  struct dinode current_inode;
+    int inum = 1;
+    struct dinode current_inode;
 
-  if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
-	  perror("lseek");
-    exit(1);
-	}
-	if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
-	  perror("read");
-    exit(1);
-	}
+    if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+            perror("lseek");
+            exit(1);
+        }
+        if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+            perror("read");
+            exit(1);
+        }
 
-  memmove(&current_inode, buf, sizeof(current_inode));
-  current_inode.type = T_ERR;
+    memmove(&current_inode, buf, sizeof(current_inode));
+    current_inode.type = T_ERR;
 
-  write(fsfd,&current_inode,sizeof(current_inode));
-  
-  printf("Changed the type of a inode");
+    write(fsfd,&current_inode,sizeof(current_inode));
+    
+    printf("Changed the type of a inode");
 
-  return 1;
+    return 1;
 }
 
 int err4(int fsfd){
-  uint b = 0;
-  write(fsfd,&b,1);
+    uint b = 0;
+    write(fsfd,&b,1);
 
-  if(lseek(fsfd, 59*BSIZE, 0) != 59 * BSIZE){
+    if(lseek(fsfd, 59*BSIZE, 0) != 59 * BSIZE){
         perror("lseek");
         exit(1);
-  }
-  printf("Removed '.' entry from the root directory");
-  return 1;
+    }
+
+    printf("Removed '.' entry from the root directory");
+    return 1;
 }
 
 int err5(int fsfd){
-  uint buf2;
-  rinode(10,&inode1);
-  uint bmapbyte;
-    
-  int inodeaddr = inode1.addrs[1]/4;
-  
-  if(lseek(fsfd, sb.bmapstart*BSIZE + inodeaddr, 0) != sb.bmapstart * BSIZE  + inodeaddr){
-    perror("lseek");
-    exit(1);
-  }
-  
-  uint a = 0;
+    uint buf2;
+    rinode(10,&inode1);
+    uint bmapbyte;
 
-  if (write(fsfd,&a,1) != 1){
-    perror("write");
-    exit(1);
-  }
-  
-  printf("Used inode marked free in bitmap");
-  return 1;
+    int inodeaddr = inode1.addrs[1]/4;
+
+    if(lseek(fsfd, sb.bmapstart*BSIZE + inodeaddr, 0) != sb.bmapstart * BSIZE  + inodeaddr){
+        perror("lseek");
+        exit(1);
+    }
+
+    uint a = 0;
+
+    if (write(fsfd,&a,1) != 1){
+        perror("write");
+        exit(1);
+    }
+
+    printf("Used inode marked free in bitmap");
+    return 1;
 
 }
 
 
 int err12(int fsfd){
-  uchar buf[BSIZE];
-	rsect(SUPERBLOCK,buf);
-	memmove(&sb, buf, sizeof(sb));
+    uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
 
-  int inum = 1;
-  struct dinode current_inode;
+    int inum = 1;
+    struct dinode current_inode;
 
-  if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
-	  perror("lseek");
-    exit(1);
-	}
+    if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+        perror("lseek");
+        exit(1);
+    }
 	if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
-	  perror("read");
-    exit(1);
+	    perror("read");
+        exit(1);
 	}
 
-  memmove(&current_inode, buf, sizeof(current_inode));
-  current_inode.type = T_DIR;
-  current_inode.nlink = T_ERR;
-  write(fsfd,&current_inode,sizeof(current_inode));
-  
-  printf("Changed the type of an inode to directory inode and changed the number of links to greater than 1");
+    memmove(&current_inode, buf, sizeof(current_inode));
+    current_inode.type = T_DIR;
+    current_inode.nlink = T_ERR;
+    write(fsfd,&current_inode,sizeof(current_inode));
 
-  return 1;
+    printf("Changed the type of an inode to directory inode and changed the number of links to greater than 1");
+
+    return 1;
 }
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//////Switch Table////////
+
+// int switch_table(int errno){
+//     if(errno == 1){
+//         err1(fsfd);
+//     }
+//     else if(errno = 2){
+//         err2(fsfd);
+//     }
+//     else if(errno = 3){
+//         err3(fsfd);
+//     }
+//     else if(errno = 4){
+//         err4(fsfd);
+//     }
+//     else if(errno = 5){
+//         err5(fsfd);
+//     }
+//     else if(errno = 6){
+//         err6(fsfd);
+//     }
+//     else if(errno = 7){
+//         err7(fsfd);
+//     }
+//     else if(errno = 8){
+//         err8(fsfd);
+//     }
+//     else if(errno = 9){
+//         err9(fsfd);
+//     }
+//     else if(errno = 10){
+//         err10(fsfd);
+//     }
+//     else if(errno = 11){
+//         err11(fsfd);
+//     }
+//     else if(errno = 12){
+//         err12(fsfd);
+//     }
+//     else{
+//     printf("ERROR NO. should be int between (1-12)");
+//     }
+//     return 0;
+// }
+/////////////////////////
 
 int main(int argc, char* argv[]){
 
@@ -222,12 +267,12 @@ int main(int argc, char* argv[]){
     }    
 
     // Read the File System image with file discriptor fsfd
-    if ((fsfd = open (argv[1],O_RDWR, 0666)) == -1) { /* open/validate file */
+    if ((fsfd = open (argv[2],O_RDWR, 0666)) == -1) { /* open/validate file */
         perror ("Error opening file :\n");
         exit (EXIT_FAILURE);
     }
 
     diskinfo(fsfd);
-
+    //switch_table(argv[1]);
     return 0;
 }
