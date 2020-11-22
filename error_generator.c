@@ -245,6 +245,7 @@ int err6(int fsfd){
 
 }
 
+
 int err9(int fsfd){
   uchar buf[BSIZE];
 	rsect(SUPERBLOCK,buf);
@@ -269,6 +270,7 @@ int err9(int fsfd){
     break;}}
   return 1;
 }
+
 
 int err10(int fsfd){
   uchar buf[BSIZE];
