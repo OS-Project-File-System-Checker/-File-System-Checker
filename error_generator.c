@@ -169,6 +169,10 @@ int err4(int fsfd){
 }
 
 int err5(int fsfd){
+	uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
+	
     uint buf2;
     rinode(10,&inode1);
     uint bmapbyte;
@@ -188,6 +192,29 @@ int err5(int fsfd){
     }
 
     printf("Used inode marked free in bitmap");
+    return 1;
+
+}
+
+int err6(int fsfd){
+	uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
+	
+    uint bmapbyte;
+
+    if(lseek(fsfd, sb.bmapstart*BSIZE + 100, 0) != sb.bmapstart * BSIZE  + 100){
+        perror("lseek");
+        exit(1);
+    }
+
+    uint a = 255;
+
+    if (write(fsfd,&a,1) != 1){
+        perror("write");
+        exit(1);
+    }
+
     return 1;
 
 }
