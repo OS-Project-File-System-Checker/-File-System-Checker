@@ -144,7 +144,7 @@ int err1(int fsfd){
     return 1;
 }
 
-int err4(int fsfd){
+int err3(int fsfd){
     uint b = 0;
     write(fsfd,&b,1);
 
@@ -153,7 +153,18 @@ int err4(int fsfd){
         exit(1);
     }
 
-    printf("Removed '.' entry from the root directory");
+    
+    return 1;
+}
+
+int err4(int fsfd){
+    uint b = 10;
+    write(fsfd,&b,1);
+
+    if(lseek(fsfd, 59*BSIZE+1, 0) != 59 * BSIZE+1){
+        perror("lseek");
+        exit(1);
+    }
     return 1;
 }
 
