@@ -144,6 +144,32 @@ int err1(int fsfd){
     return 1;
 }
 
+int err2(int fsfd){
+    uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
+
+    int inum = 5;
+    struct dinode current_inode;
+
+    if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+            perror("lseek");
+            exit(1);
+        }
+        if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+            perror("read");
+            exit(1);
+        }
+
+    memmove(&current_inode, buf, sizeof(current_inode));
+    current_inode.addrs[0] = 100000;
+	current_inode.addrs[11] = 100000;
+
+    write(fsfd,&current_inode,sizeof(current_inode));
+
+    return 1;
+}
+
 int err3(int fsfd){
     uint b = 0;
     write(fsfd,&b,1);
