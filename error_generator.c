@@ -245,6 +245,71 @@ int err6(int fsfd){
 
 }
 
+int err7(int fsfd) {
+  
+  struct dinode inode5;
+  struct dinode inode6;
+
+  rinode(5,&inode5);
+  rinode(6,&inode6);
+
+  printf("inode5 address : %d \n", inode5.addrs[5]);
+  printf("inode6 address : %d \n", inode6.addrs[5]);
+
+  printf ("making error...")
+  
+  inode6.addrs[5] = inode5.addrs[5];
+
+  winode(6,&inode6);
+
+  printf("inode6 address now : %d \n", inode6.addrs[5]);
+
+  return 1;
+}
+
+int err8(int fsfd) {
+  
+  struct dinode inode1;
+  struct dinode inode2;
+
+  int inum=3;
+
+  //To get two inodes which point to indirect blocks ....
+  do {
+    rinode(inum, &inode1);
+    inum += 1;
+  } while (inode1.addrs[NDIRECT] == 0);
+
+
+  do {
+    rinode(inum, &inode2);
+    inum += 1;
+  } while (inode2.addrs[NDIRECT] == 0);
+
+  uint addr1,addr2;
+
+  lseek(fsfd, inode1.addrs[NDIRECT] * BSIZE + 1*sizeof(uint), SEEK_SET);
+  read(fsfd, &addr1, sizeof(uint));
+
+  lseek(fsfd, inode2.addrs[NDIRECT] * BSIZE + 2*sizeof(uint), SEEK_SET);
+  read(fsfd, &addr2, sizeof(uint));
+
+
+  printf("indirect inode1 address : %d \n", addr1);
+  printf("indirect inode2 address : %d \n", addr2);
+
+  lseek(fsfd, inode2.addrs[NDIRECT] * BSIZE + 2*sizeof(uint), SEEK_SET);
+  write(fsfd, &addr1, sizeof(uint));
+
+  printf("making error....");
+
+  lseek(fsfd, inode2.addrs[NDIRECT] * BSIZE + 2*sizeof(uint), SEEK_SET);
+  read(fsfd, &addr2, sizeof(uint));
+
+  printf("indirect inode2 address : %d \n", addr2);
+
+  return 1;
+}
 
 int err9(int fsfd){
   uchar buf[BSIZE];
@@ -295,6 +360,68 @@ int err10(int fsfd){
     printf("marked a used inode as free inode\n");
     break;}}
   return 1;
+}
+
+int err11(int fsfd) {
+  
+  uchar buf[BSIZE];
+	rsect(SUPERBLOCK,buf);
+	memmove(&sb, buf, sizeof(sb));
+
+  struct dinode inode;
+
+  int inum=3;
+
+  do {
+    
+    if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+          perror("lseek");
+          exit(1);
+      }
+    
+    if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+        perror("read");
+          exit(1);
+    }
+    
+    memmove(&inode, buf, sizeof(inode));
+
+    inum += 1;
+
+  }while (inode.type != T_FILE);
+
+  if (inum != 3) {
+    inum -= 1;
+  }
+  
+  
+  printf("no of links of current inode : %d \n", inode.nlink);
+
+  inode.nlink += 1;
+
+  if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+          perror("lseek");
+          exit(1);
+  }
+
+  write(fsfd,&inode,sizeof(inode));
+
+  if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+          perror("lseek");
+          exit(1);
+  }
+    
+  if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+        perror("read");
+          exit(1);
+  }
+
+  memmove(&inode, buf, sizeof(inode));
+
+  printf("no of links of current inode now : %d \n", inode.nlink);
+
+  return 1;
+
 }
 
 int err12(int fsfd){
