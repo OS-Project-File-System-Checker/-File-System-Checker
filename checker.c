@@ -114,6 +114,82 @@ int diskinfo(int fsfd) {        //function that prints the details of the superb
 
 /////////////////////////// Checker Functions from here ////////////////////////////////
 
+// Print the error statements in the functions itself
+
+int check1(int fsfd){
+
+    return 0; // return 1 if error is detected
+}
+
+int check2(int fsfd){
+
+    return 0; // return 1 if error is detected
+}
+
+int check3(int fsfd){
+
+    return 0; // return 1 if error is detected
+}
+
+int check4(int fsfd){
+
+    return 0; // return 1 if error is detected
+}
+
+int check5(int fsfd){
+
+    return 0; // return 1 if error is detected
+}
+
+int check6(int fsfd){
+
+    return 0; // return 1 if error is detected
+}
+
+int check7(int fsfd){
+
+    return 0; // return 1 if error is detected
+}
+
+int check8(int fsfd){
+
+    return 0; // return 1 if error is detected
+}
+
+int check9(int fsfd){
+
+    return 0; // return 1 if error is detected
+}
+
+int check10(int fsfd){
+
+    return 0; // return 1 if error is detected
+}
+
+int check11(int fsfd){
+
+    return 0; // return 1 if error is detected
+}
+
+int check12(int fsfd){
+
+    return 0; // return 1 if error is detected
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////// Check Image ///////////////////////////////////////////
+
+int check_fsmiage(int fsfd){
+    int total;
+    total = check1(fsfd)+check2(fsfd)+check3(fsfd)+check4(fsfd)+check5(fsfd)+check6(fsfd)+check7(fsfd)+check8(fsfd)+check9(fsfd)+check10(fsfd)+check11(fsfd)+check12(fsfd); 
+    if(total > 0){
+        return 1;
+    }
+    else{
+        printf("There are no errors in the fs.img\n");
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -128,4 +204,10 @@ int main(int argc, char* argv[]){
         perror ("Error opening file :\n");
         exit (EXIT_FAILURE);
     }
+    
+    // diskinfo(fsfd);
+
+    check_fsmiage(fsfd);
+    
+    return 0;
 }
