@@ -132,7 +132,50 @@ int check1(int fsfd){
 }
 
 int check2(int fsfd){
+    int err = 0;
+    
+    uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
 
+    int i;   
+    struct dinode inode1;
+    int data_block_start = sb.size-sb.nblocks;
+    for (i = 1;i<=NINODE;i++){
+        rinode(i,&inode1);
+        for(int j = 0;j<NDIRECT;j++){
+            if(inode1.addrs[j] != 0){
+                if(inode1.addrs[j] < data_block_start || inode1.addrs[j] > sb.size){
+                    printf("ERROR: bad direct address in inode : %d\n",i);
+                    err = 1;
+                }
+            }
+        }
+        if(inode1.addrs[NDIRECT] != 0){
+            if (lseek(fsfd, inode1.addrs[NDIRECT] * BSIZE , 0)!= inode1.addrs[NDIRECT] * BSIZE){
+				perror("lseek");
+				exit(1);
+			}
+            uint buf2;
+            int k;
+			for(k=0; k<NINDIRECT; k++){														//loop through indirect ptrs
+				if (read(fsfd, &buf2, sizeof(uint))!= sizeof(uint)){						//read the next addr
+					perror("read");
+					exit(1);
+				}
+				if (buf2!=0){													//if block is in use
+                    if ((buf2<data_block_start) || (buf2 > sb.size)){			//if block is out of bounds
+					    printf("ERROR: bad indirect address in inode : %d\n",i);
+                        err = 1;
+                    }
+				}
+			}
+
+        }
+    }
+    if(err == 1){
+        return 1;
+    }
     return 0; // return 1 if error is detected
 }
 
