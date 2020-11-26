@@ -485,6 +485,7 @@ int switch_table(int err){
     }
     else if(err == 9){
         err9(fsfd);
+    }
     else if(err == 10){
         err10(fsfd);
     }
