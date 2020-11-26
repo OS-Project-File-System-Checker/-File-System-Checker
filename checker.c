@@ -116,6 +116,9 @@ int diskinfo(int fsfd) {        //function that prints the details of the superb
 // Print the error statements in the functions itself
 
 int check1(int fsfd){
+    uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
     int i;   
     struct dinode inode1;
     for (i = 1;i<=NINODE;i++){
