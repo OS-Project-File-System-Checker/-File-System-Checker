@@ -284,7 +284,7 @@ int check_fsimage(int fsfd){
         return 1;
     }
     else{
-        printf("There are no errors in the fs.img\n");
+        printf("There are no errors in the file system image\n");
     }
 }
 
