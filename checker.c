@@ -20,7 +20,6 @@
 int fsfd;
 struct superblock sb;
 
-
 ushort
 xshort(ushort x)
 {
@@ -117,7 +116,15 @@ int diskinfo(int fsfd) {        //function that prints the details of the superb
 // Print the error statements in the functions itself
 
 int check1(int fsfd){
-
+    int i;   
+    struct dinode inode1;
+    for (i = 1;i<=NINODE;i++){
+        rinode(i,&inode1);
+        if((inode1.type != 0) && (inode1.type != 1) && (inode1.type != 2) && (inode1.type != 3)){
+            printf("ERROR: bad inode\n");
+            return 1;
+        }
+    }
     return 0; // return 1 if error is detected
 }
 
@@ -180,7 +187,7 @@ int check12(int fsfd){
 
 //////////////////////////////// Check Image ///////////////////////////////////////////
 
-int check_fsmiage(int fsfd){
+int check_fsimage(int fsfd){
     int total;
     total = check1(fsfd)+check2(fsfd)+check3(fsfd)+check4(fsfd)+check5(fsfd)+check6(fsfd)+check7(fsfd)+check8(fsfd)+check9(fsfd)+check10(fsfd)+check11(fsfd)+check12(fsfd); 
     if(total > 0){
@@ -204,10 +211,14 @@ int main(int argc, char* argv[]){
         perror ("Error opening file :\n");
         exit (EXIT_FAILURE);
     }
-    
-    // diskinfo(fsfd);
 
-    check_fsmiage(fsfd);
-    
+    uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
+
+    //diskinfo(fsfd);
+
+    check_fsimage(fsfd);
+
     return 0;
 }
