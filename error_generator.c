@@ -198,7 +198,7 @@ int err5(int fsfd){
 	uchar buf[BSIZE];
     rsect(SUPERBLOCK,buf);
     memmove(&sb, buf, sizeof(sb));
-	
+	struct dinode inode1;
     uint buf2;
     rinode(10,&inode1);
     uint bmapbyte;
@@ -256,7 +256,7 @@ int err7(int fsfd) {
   printf("inode5 address : %d \n", inode5.addrs[5]);
   printf("inode6 address : %d \n", inode6.addrs[5]);
 
-  printf ("making error...")
+  printf ("making error...");
   
   inode6.addrs[5] = inode5.addrs[5];
 
@@ -457,48 +457,48 @@ int err12(int fsfd){
 
 //////Switch Table////////
 
-// int switch_table(int errno){
-//     if(errno == 1){
-//         err1(fsfd);
-//     }
-//     else if(errno = 2){
-//         err2(fsfd);
-//     }
-//     else if(errno = 3){
-//         err3(fsfd);
-//     }
-//     else if(errno = 4){
-//         err4(fsfd);
-//     }
-//     else if(errno = 5){
-//         err5(fsfd);
-//     }
-//     else if(errno = 6){
-//         err6(fsfd);
-//     }
-//     else if(errno = 7){
-//         err7(fsfd);
-//     }
-//     else if(errno = 8){
-//         err8(fsfd);
-//     }
-//     else if(errno = 9){
-//         err9(fsfd);
-//     }
-//     else if(errno = 10){
-//         err10(fsfd);
-//     }
-//     else if(errno = 11){
-//         err11(fsfd);
-//     }
-//     else if(errno = 12){
-//         err12(fsfd);
-//     }
-//     else{
-//     printf("ERROR NO. should be int between (1-12)");
-//     }
-//     return 0;
-// }
+int switch_table(int err){
+    
+    if(err == 1){
+        err1(fsfd);
+    }
+    else if(err == 2){
+        err2(fsfd);
+    }
+    else if(err == 3){
+        err3(fsfd);
+    }
+    else if(err == 4){
+        err4(fsfd);
+    }
+    else if(err == 5){
+        err5(fsfd);
+    }
+    else if(err == 6){
+        err6(fsfd);
+    }
+    else if(err == 7){
+        err7(fsfd);
+    }
+    else if(err == 8){
+        err8(fsfd);
+    }
+    else if(err == 9){
+        err9(fsfd);
+    else if(err == 10){
+        err10(fsfd);
+    }
+    else if(err == 11){
+        err11(fsfd);
+    }
+    else if(err == 12){
+        err12(fsfd);
+    }
+    else{
+    printf("ERROR NO. should be in between (1-12)");
+    }
+    return 0;
+}
 /////////////////////////
 
 int main(int argc, char* argv[]){
@@ -514,7 +514,7 @@ int main(int argc, char* argv[]){
         exit (EXIT_FAILURE);
     }
 
-    diskinfo(fsfd);
-    //switch_table(argv[1]);
+    // diskinfo(fsfd);
+    switch_table(atoi(argv[1]));
     return 0;
 }
