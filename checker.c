@@ -181,6 +181,50 @@ int check2(int fsfd){
 
 int check3(int fsfd){
 
+    int err = 0;
+    uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
+    struct dinode inode1;
+    rinode(1,&inode1);
+    if(inode1.type != T_DIR){
+        printf("ERROR: root directory does not exist\n");
+        err = 1;
+        return 1;
+    }
+
+    char *p = NULL; 
+    if ((p = mmap (NULL, FSSIZE*BSIZE, PROT_READ, MAP_PRIVATE, fsfd, 0)) == (void *) -1) {
+        perror ("mmap failed");
+        exit (EXIT_FAILURE);
+    }
+
+    if(inode1.addrs[0] != 0){
+        if(lseek(fsfd, inode1.addrs[0]*BSIZE, 0) != inode1.addrs[0] * BSIZE){
+            perror("lseek");
+            exit(1);
+        }
+        char buf2[BSIZE];
+        if(read(fsfd,&buf2,BSIZE) != BSIZE){
+            perror("read");
+            exit(1);
+        }
+
+        struct dirent* root = (struct dirent *)(p+ inode1.addrs[0]*BSIZE);
+        if((root+1)->inum != root->inum){
+            printf("ERROR: root directory does not exist\n");
+            err = 1;
+            return 1;
+        }
+        // for(int k = 0;k<20;k++){
+        //     printf("%c\n",buf2[k]);
+        // }
+    }
+    else{
+        printf("ERROR: root directory does not exist\n");
+        err = 1;
+        return 1;
+    }
     return 0; // return 1 if error is detected
 }
 
