@@ -214,11 +214,6 @@ int main(int argc, char* argv[]){
         perror ("Error opening file :\n");
         exit (EXIT_FAILURE);
     }
-
-    uchar buf[BSIZE];
-    rsect(SUPERBLOCK,buf);
-    memmove(&sb, buf, sizeof(sb));
-
     //diskinfo(fsfd);
 
     check_fsimage(fsfd);
