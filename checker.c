@@ -244,12 +244,78 @@ int check6(int fsfd){
 }
 
 int check7(int fsfd){
+    int err = 0;
 
+    uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
+
+    // initializing array address with zeores
+    uint address[sb.size];
+    for(int k=0;k<sb.size;k++){
+        address[k]=0;
+    }
+
+    int i;   
+    struct dinode inode1;
+    for (i = 1;i<=NINODE;i++){
+        rinode(i,&inode1);  // loop to read all inodes
+        for(int j = 0;j<NDIRECT;j++){
+            if(address[inode1.addrs[j]] == 1){
+                printf("ERROR: direct address used more than once\n");
+                err = 1;
+                return 1;
+            }
+            address[inode1.addrs[j]] = 1;   //assigning the value one as an indication of being used
+        }
+    }
+    if(err == 1){
+        return 1;
+    }
     return 0; // return 1 if error is detected
 }
 
-int check8(int fsfd){
 
+int check8(int fsfd){
+    int err = 0;
+
+    uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
+
+    // initializing array address with zeores
+    uint address[sb.size];
+    for(int k=0;k<sb.size;k++){
+        address[k]=0;
+    }
+
+    int i;
+    uint addr; 
+    struct dinode inode1;
+    for (i = 1;i<=NINODE;i++){
+        rinode(i,&inode1);  // loop to read all inodes
+        if(inode1.addrs[NDIRECT] != 0){
+            for(int j=0; j<NINDIRECT; j++){
+                lseek(fsfd, inode1.addrs[NDIRECT] * BSIZE + j*sizeof(uint), SEEK_SET);      //loop through indirect ptrs
+                read(fsfd, &addr, sizeof(uint));                                            //read the next addr
+
+                if(addr == 0){
+                    continue;
+                }
+
+                if(address[addr] == 1){
+                    printf("ERROR: indirect address used more than once\n");
+                    err = 1;
+                    return 1;
+                }
+                address[addr] = 1;   //assigning the value one as an indication of being used
+            }
+        }
+
+    }
+    if(err == 1){
+        return 1;
+    }
     return 0; // return 1 if error is detected
 }
 
