@@ -250,19 +250,19 @@ int err7(int fsfd) {
   struct dinode inode5;
   struct dinode inode6;
 
-  rinode(5,&inode5);
+  rinode(8,&inode5);  // reading an inode with non-zero direct blocks
   rinode(6,&inode6);
 
-  printf("inode5 address : %d \n", inode5.addrs[5]);
-  printf("inode6 address : %d \n", inode6.addrs[5]);
+  printf("inode5 address : %d \n", inode5.addrs[1]);
+  printf("inode6 address : %d \n", inode6.addrs[1]);
 
   printf ("making error...");
   
-  inode6.addrs[5] = inode5.addrs[5];
+  inode6.addrs[1] = inode5.addrs[1];  // making values equal - to use more than once
 
   winode(6,&inode6);
 
-  printf("inode6 address now : %d \n", inode6.addrs[5]);
+  printf("inode6 address now : %d \n", inode6.addrs[1]);
 
   return 1;
 }
