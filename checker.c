@@ -320,6 +320,70 @@ int check8(int fsfd){
 }
 
 int check9(int fsfd){
+    uchar buf[BSIZE];
+	rsect(SUPERBLOCK,buf);
+	memmove(&sb, buf, sizeof(sb));
+    int indir[sb.ninodes];
+    for (int in=0; in<sb.ninodes; in++){indir[in]=0;}
+    struct dinode current_inode;
+    for (int inum=0; inum<sb.ninodes; inum++){	
+    if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+	    perror("lseek");
+        exit(1);
+	}
+	if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+	    perror("read");
+        exit(1);
+	}
+    memmove(&current_inode, buf, sizeof(current_inode));
+    if (current_inode.type==T_DIR){
+		for(int x=0; x<NDIRECT; x++){
+			if(current_inode.addrs[x]!=0) {
+			if (lseek(fsfd,current_inode.addrs[x]*BSIZE, SEEK_SET) != current_inode.addrs[x]*BSIZE){ 
+				perror("lseek");
+				exit(1);}
+			struct dirent buf;
+			for(int de=0; de<(BSIZE/sizeof(struct dirent)); de++){					//loop thorugh all directory entries
+				read(fsfd, &buf, sizeof(struct dirent)); 
+				if(buf.inum!=inum){
+					indir[buf.inum]=1;//making all directory entries 1
+				}}}}
+		uint directory_address;
+		if (current_inode.addrs[NDIRECT]!=0){		//if there is an indirect pointers
+			for(int y=0; y<NINDIRECT; y++){
+				if (lseek(fsfd, current_inode.addrs[NDIRECT] * BSIZE + y*sizeof(uint), SEEK_SET) != current_inode.addrs[NDIRECT] * BSIZE + y*sizeof(uint)){
+					perror("lseek");
+					exit(1);
+				}
+				if (read(fsfd, &directory_address, sizeof(uint)) != sizeof(uint)){
+					perror("read");
+					exit(1);	
+				}
+				if(directory_address!=0) {
+				if (lseek(fsfd,directory_address*BSIZE, SEEK_SET) != directory_address*BSIZE){
+					perror("lseek");
+					exit(1);}
+				struct dirent buf;
+				for(int i=0;i<(BSIZE/sizeof(struct dirent));i++){ //loop thorugh all dir entries
+					read(fsfd, &buf, sizeof(struct dirent)); 
+				if(buf.inum!=inum){
+					indir[buf.inum]=1;//making all directory entries 1
+					}}}}}}}
+    for (int inum=0; inum<sb.ninodes; inum++){	
+    if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+	    perror("lseek");
+        exit(1);
+	}
+	if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+	    perror("read");
+        exit(1);
+	}
+    memmove(&current_inode, buf, sizeof(current_inode));
+    if (current_inode.type!=0){
+        if (indir[inum]==0 && inum!=1){
+            printf("ERROR: inode marked use but not found in a directory.\n");
+            return(1);
+        }}}
 
     return 0; // return 1 if error is detected
 }
