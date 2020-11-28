@@ -338,7 +338,7 @@ int err9(int fsfd){
 
   int inum;
   struct dinode current_inode;
-  for (inum=0; inum<sb.ninodes; inum++){	
+  for (inum=2; inum<sb.ninodes; inum++){	
   if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
 	  perror("lseek");
     exit(1);
@@ -351,7 +351,7 @@ int err9(int fsfd){
   if (current_inode.type==0){
     current_inode.type = T_FILE;
     write(fsfd,&current_inode,sizeof(current_inode));
-    printf("marked a free inode as used Inode");
+    printf("marked a free inode as used Inode\n");
     break;}}
   return 1;
 }
