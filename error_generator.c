@@ -123,7 +123,7 @@ int err1(int fsfd){
     memmove(&sb, buf, sizeof(sb));
 
     int inum = 1;
-    struct dinode current_inode;
+    struct dinode inode1;
 
     if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
             perror("lseek");
@@ -134,10 +134,10 @@ int err1(int fsfd){
             exit(1);
         }
 
-    memmove(&current_inode, buf, sizeof(current_inode));
-    current_inode.type = T_ERR;
+    memmove(&inode1, buf, sizeof(inode1));
+    inode1.type = T_ERR;
 
-    write(fsfd,&current_inode,sizeof(current_inode));
+    write(fsfd,&inode1,sizeof(inode1));
     
     printf("Changed the type of a inode");
 
@@ -150,7 +150,7 @@ int err2(int fsfd){
     memmove(&sb, buf, sizeof(sb));
 
     int inum = 5;
-    struct dinode current_inode;
+    struct dinode inode1;
 
     if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
             perror("lseek");
@@ -161,11 +161,11 @@ int err2(int fsfd){
             exit(1);
         }
 
-    memmove(&current_inode, buf, sizeof(current_inode));
-    current_inode.addrs[0] = 100000;
-	current_inode.addrs[11] = 100000;
+    memmove(&inode1, buf, sizeof(inode1));
+    inode1.addrs[0] = 100000;
+	inode1.addrs[12] = 100000;
 
-    write(fsfd,&current_inode,sizeof(current_inode));
+    write(fsfd,&inode1,sizeof(inode1));
 
     return 1;
 }
@@ -194,20 +194,19 @@ int err4(int fsfd){
 		exit(1);
 	}
 
-	struct dirent buf1;
+	struct dirent inode1;
 	int i;
 
 	for(i=0; i<IPB; i++){
-		if(read(fsfd, &buf1, sizeof(struct dirent))!=sizeof(struct dirent)){
+		if(read(fsfd, &inode1, sizeof(struct dirent))!=sizeof(struct dirent)){
 			perror("read");
 			exit(1);
 		}
 
-		if(0==buf1.inum){ continue; }
-		if(strncmp(".", buf1.name, DIRSIZ)==0){
-			
-            memcpy(buf1.name,    "Paulo", 6);
-            write(fsfd,&buf1,sizeof(buf1));
+		if(0==inode1.inum){ continue; }
+		if(strncmp(".", inode1.name, DIRSIZ)==0){
+            memcpy(inode1.name,"Paulo", 6);
+            write(fsfd,&inode1,sizeof(buf1));
 		}
 	}
 	
