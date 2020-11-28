@@ -275,7 +275,79 @@ int check5(int fsfd){
 }
 
 int check6(int fsfd){
+    int err = 0;
 
+    uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
+
+    uint add1[sb.size];             //add of inodes
+    for(int k=0;k<sb.size;k++){
+        if(k < (sb.size - sb.nblocks)){
+            add1[k] = 1;
+        }
+        else
+        {
+            add1[k]=0;
+        }
+    }
+
+    uint add2[sb.size];             //add of bitmap
+    for(int k=0;k<sb.size;k++){
+        add2[k]=0;
+    }
+
+    int i;   
+    uint addr; 
+    struct dinode inode1;
+    for (i = 1;i<=NINODE;i++){
+        rinode(i,&inode1);  // loop to read all inodes
+        if(inode1.type != 0){
+            for(int j = 0;j<=NDIRECT;j++){
+                if(inode1.addrs[j] != 0){
+                    add1[inode1.addrs[j]] =1;
+                }
+            }
+            if(inode1.addrs[NDIRECT] != 0){
+                for(int j=0; j<NINDIRECT; j++){
+                    lseek(fsfd, inode1.addrs[NDIRECT] * BSIZE + j*sizeof(uint), SEEK_SET);      //loop through indirect ptrs
+                    read(fsfd, &addr, sizeof(uint));                                            //read the next addr
+                    if(addr != 0){
+                        add1[addr] = 1;
+                    }
+                }
+            }
+        }
+    }
+
+    if(lseek(fsfd, sb.bmapstart*BSIZE, 0) != sb.bmapstart * BSIZE){
+        perror("lseek");
+        exit(1);
+    }
+    uint buf3;
+    for( i = 0;i<1000/8;i++){
+    if (read(fsfd, &buf3, 1) != 1){	//read byte containing bit we want
+        perror("read");
+        exit(1);    
+      }
+      for(int j = 0;j<8;j++){
+        if ((buf3 >> 2)%2 == 1){
+            add2[i*8 + j] = 1;
+        }
+      }
+    }
+
+    for(i = 0;i<sb.size;i++){
+        if ((add2[i] == 1) && (add1[i] == 0)){
+            
+            err = 1;
+        }
+    }
+
+    if (err == 1){
+        printf("ERROR: bitmap marks block in use but it is not in use\n");
+        return 1;
+    }
     return 0; // return 1 if error is detected
 }
 
