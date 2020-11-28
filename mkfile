@@ -2,7 +2,7 @@ all: build
 
 build:
 	gcc checker.c -o checker
-	gcc error.c -o error
+	gcc error_generator.c -o error
 
 clean:
 	@echo "Cleaning..."
@@ -10,7 +10,7 @@ clean:
 	rm checker
 
 generr: 
-	gcc error.c -o error
+	gcc error_generator.c -o error
 	@echo "Generating error files..."
 	cp fs.img e1.img
 	./error 1 e1.img
