@@ -516,13 +516,13 @@ int check9(int fsfd){
 				perror("lseek");
 				exit(1);}
 			struct dirent buf;
-			for(int de=0; de<(BSIZE/sizeof(struct dirent)); de++){					//loop thorugh all directory entries
+			for(int de=0; de<(BSIZE/sizeof(struct dirent)); de++){	//loop thorugh all directory entries
 				read(fsfd, &buf, sizeof(struct dirent)); 
 				if(buf.inum!=inum){
-					indir[buf.inum]=1;//making all directory entries 1
+					indir[buf.inum]=1;//marking all directory entries present
 				}}}}
 		uint directory_address;
-		if (current_inode.addrs[NDIRECT]!=0){		//if there is an indirect pointers
+		if (current_inode.addrs[NDIRECT]!=0){//if there is an indirect pointers
 			for(int y=0; y<NINDIRECT; y++){
 				if (lseek(fsfd, current_inode.addrs[NDIRECT] * BSIZE + y*sizeof(uint), SEEK_SET) != current_inode.addrs[NDIRECT] * BSIZE + y*sizeof(uint)){
 					perror("lseek");
@@ -540,7 +540,7 @@ int check9(int fsfd){
 				for(int i=0;i<(BSIZE/sizeof(struct dirent));i++){ //loop thorugh all dir entries
 					read(fsfd, &buf, sizeof(struct dirent)); 
 				if(buf.inum!=inum){
-					indir[buf.inum]=1;//making all directory entries 1
+					indir[buf.inum]=1;//marking all directory entries present
 					}}}}}}}
     for (int inum=0; inum<sb.ninodes; inum++){	
     if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
@@ -587,13 +587,13 @@ int check10(int fsfd){
 				perror("lseek");
 				exit(1);}
 			struct dirent buf;
-			for(int de=0; de<(BSIZE/sizeof(struct dirent)); de++){					//loop thorugh all directory entries
+			for(int de=0; de<(BSIZE/sizeof(struct dirent)); de++){	//loop thorugh all directory entries
 				read(fsfd, &buf, sizeof(struct dirent)); 
 				if(buf.inum!=inum){
-					indir[buf.inum]=1;//making all directory entries 1
+					indir[buf.inum]=1;//marking all directory entries prsent
 				}}}}
 		uint directory_address;
-		if (current_inode.addrs[NDIRECT]!=0){		//if there is an indirect pointers
+		if (current_inode.addrs[NDIRECT]!=0){//if there is an indirect pointers
 			for(int y=0; y<NINDIRECT; y++){
 				if (lseek(fsfd, current_inode.addrs[NDIRECT] * BSIZE + y*sizeof(uint), SEEK_SET) != current_inode.addrs[NDIRECT] * BSIZE + y*sizeof(uint)){
 					perror("lseek");
@@ -611,7 +611,7 @@ int check10(int fsfd){
 				for(int i=0;i<(BSIZE/sizeof(struct dirent));i++){ //loop thorugh all dir entries
 					read(fsfd, &buf, sizeof(struct dirent)); 
 				if(buf.inum!=inum){
-					indir[buf.inum]=1;//making all directory entries 1
+					indir[buf.inum]=1;//marking all directory entries present
 					}}}}}}}
     for (int inum=0; inum<sb.ninodes; inum++){	
     if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
