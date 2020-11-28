@@ -36,3 +36,82 @@ generr:
 	./error 11 e11.img
 	cp fs.img e12.img
 	./error 12 e12.img
+
+
+rmerr:
+	@echo "Removing error files.."
+	rm e1.img
+	rm e2.img
+	rm e3.img
+	rm e4.img
+	rm e5.img
+	rm e6.img
+	rm e7.img
+	rm e8.img
+	rm e9.img
+	rm e10.img
+	rm e11.img
+	rm e12.img
+
+checkerr:
+	gcc checker.c -o checker
+	@echo "Checking all err files..."
+	@echo ""
+	@echo "Errors in file 1: "
+	./checker e1.img
+	@echo ""
+
+	@echo ""
+	@echo "Errors in file 2: "
+	./checker e2.img
+	@echo ""
+
+	@echo ""
+	@echo "Errors in file 3: "
+	./checker e3.img
+	@echo ""
+
+	@echo ""
+	@echo "Errors in file 4: "
+	./checker e4.img
+	@echo ""
+
+	@echo ""
+	@echo "Errors in file 5: "
+	./checker e5.img
+	@echo ""
+
+	@echo ""
+	@echo "Errors in file 6: "
+	./checker e6.img
+	@echo ""
+
+	@echo ""
+	@echo "Errors in file 7: "
+	./checker e7.img
+	@echo ""
+
+	@echo ""
+	@echo "Errors in file 8: "
+	./checker e8.img
+	@echo ""
+
+	@echo ""
+	@echo "Errors in file 9: "
+	./checker e9.img
+	@echo ""
+
+	@echo ""
+	@echo "Errors in file 10: "
+	./checker e10.img
+	@echo ""
+
+	@echo ""
+	@echo "Errors in file 11: "
+	./checker e11.img
+	@echo ""
+
+	@echo ""
+	@echo "Errors in file 12: "
+	./checker e12.img
+	@echo ""
