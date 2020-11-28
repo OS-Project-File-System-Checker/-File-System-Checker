@@ -278,7 +278,7 @@ int check5(int fsfd){int err=0;
     
     for (int i = 0;i<=NINODE;i++){
 	    uint buf2;
-        uint buf;
+        uint buf1;
         rinode(i,&inode1);  
         for(int j = 0;j<NDIRECT;j++)
         {
@@ -292,8 +292,8 @@ int check5(int fsfd){int err=0;
 				    perror("read");
 				    exit(1);
 			    }
-                int shift_amt=inode1.addrs[j]%8;
-			    buf2=buf2 >> shift_amt;
+                int bit_traversal=inode1.addrs[j]%8;
+			    buf2=buf2 >> bit_traversal;
 			    buf2=buf2%2;
                 if(buf2==0) {
                     printf("ERROR: address used by inode but marked free in bitmap\n");
@@ -304,18 +304,17 @@ int check5(int fsfd){int err=0;
         }
 
         if(inode1.addrs[NDIRECT] != 0){											
-		int x;
-		for(x=0; x<NINDIRECT; x++){														
-		    if (lseek(fsfd, inode1.addrs[NDIRECT] * BSIZE + x*sizeof(uint), SEEK_SET) != inode1.addrs[NDIRECT] * BSIZE + x*sizeof(uint)){
+		for(int i=0; i<NINDIRECT; i++){														
+		    if (lseek(fsfd, inode1.addrs[NDIRECT] * BSIZE + i*sizeof(uint), SEEK_SET) != inode1.addrs[NDIRECT] * BSIZE + i*sizeof(uint)){
 		        perror("lseek");
 			    exit(1);
             }
-		    if (read(fsfd, &buf, sizeof(uint)) != sizeof(uint)){														//read the next entry
+		    if (read(fsfd, &buf1, sizeof(uint)) != sizeof(uint)){														//read the next entry
 			    perror("read");
 			    exit(1);
 		    }
-		    if (buf!=0){		
-			    if (lseek(fsfd, sb.bmapstart*BSIZE + buf/8,SEEK_SET) != sb.bmapstart*BSIZE + buf/8){ 
+		    if (buf1!=0){		
+			    if (lseek(fsfd, sb.bmapstart*BSIZE + buf1/8,SEEK_SET) != sb.bmapstart*BSIZE + buf1/8){ 
 			    perror("lseek");
 			    exit(1);
 		    }
