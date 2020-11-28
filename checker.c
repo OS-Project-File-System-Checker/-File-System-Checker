@@ -323,8 +323,8 @@ int check5(int fsfd){int err=0;
 			    perror("read");
 			    exit(1);
 		    }
-		    int shift_amt=inode1.addrs[i]%8;
-		    buf2=buf2 >> shift_amt;
+		    int bit_traversal=inode1.addrs[i]%8;
+		    buf2=buf2 >> bit_traversal;
 		    buf2=buf2%2;
 		    if(buf2==0) {
                 printf("ERROR: address used by inode but marked free in bitmap\n");
