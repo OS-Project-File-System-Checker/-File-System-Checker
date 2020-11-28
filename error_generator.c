@@ -206,7 +206,7 @@ int err4(int fsfd){
 		if(0==inode1.inum){ continue; }
 		if(strncmp(".", inode1.name, DIRSIZ)==0){
             memcpy(inode1.name,"Paulo", 6);
-            write(fsfd,&inode1,sizeof(buf1));
+            write(fsfd,&inode1,sizeof(inode1));
 		}
 	}
 	
