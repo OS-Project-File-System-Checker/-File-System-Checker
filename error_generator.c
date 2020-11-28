@@ -207,7 +207,6 @@ int err4(int fsfd){
 		if(strncmp(".", buf1.name, DIRSIZ)==0){
 			
             memcpy(buf1.name,    "Paulo", 6);
-            printf("%s",buf1.name);
             write(fsfd,&buf1,sizeof(buf1));
 		}
 	}
