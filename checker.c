@@ -774,7 +774,7 @@ int check11(int fsfd){
         
         memmove(&current_inode, buf, sizeof(current_inode));
 
-        if(current_inode.type == T_FILE && current_inode.nlink != total_num_ref(current_inode, inum))
+        if(current_inode.type == T_FILE && current_inode.nlink != total_num_ref(inum))
         {
 
             printf("ERROR: bad reference count for file.");
