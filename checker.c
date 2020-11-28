@@ -143,15 +143,15 @@ int check2(int fsfd){
     int data_block_start = sb.size-sb.nblocks;
     for (i = 1;i<=NINODE;i++){
         rinode(i,&inode1);
-        for(int j = 0;j<NDIRECT;j++){
+        for(int j = 0;j<=NDIRECT;j++){
             if(inode1.addrs[j] != 0){
                 if(inode1.addrs[j] < data_block_start || inode1.addrs[j] > sb.size){
-                    printf("ERROR: bad direct address in inode : %d\n",i);
+                    printf("ERROR: bad direct address in inode : %d [%d]\n",i,j);
                     err = 1;
                 }
             }
         }
-        if(inode1.addrs[NDIRECT] != 0){
+        if((inode1.addrs[NDIRECT] != 0)  && (inode1.addrs[NDIRECT] < sb.size)){
             if (lseek(fsfd, inode1.addrs[NDIRECT] * BSIZE , 0)!= inode1.addrs[NDIRECT] * BSIZE){
 				perror("lseek");
 				exit(1);
@@ -178,6 +178,7 @@ int check2(int fsfd){
     }
     return 0; // return 1 if error is detected
 }
+
 
 int check3(int fsfd){
 
