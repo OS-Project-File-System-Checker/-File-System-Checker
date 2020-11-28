@@ -748,7 +748,6 @@ int check11(int fsfd){
         {
 
             printf("ERROR: bad reference count for file.");
-            close(fsfd);
             return 1;
         
         }
@@ -782,7 +781,6 @@ int check12(int fsfd){
         if(current_inode.type == T_DIR && current_inode.nlink > 1)
         {
             printf("ERROR: directory appears more than once in file system.\n");
-            close(fsfd);
             return 1;
         }
     }
