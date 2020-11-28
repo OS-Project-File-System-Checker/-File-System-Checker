@@ -172,12 +172,13 @@ int err2(int fsfd){
 
 int err3(int fsfd){
     uint b = 0;
-    write(fsfd,&b,1);
+    
 
     if(lseek(fsfd, 59*BSIZE, 0) != 59 * BSIZE){
         perror("lseek");
         exit(1);
     }
+	write(fsfd,&b,1);
 
     
     return 1;
@@ -185,12 +186,13 @@ int err3(int fsfd){
 
 int err4(int fsfd){
     uint b = 10;
-    write(fsfd,&b,1);
-
+	
     if(lseek(fsfd, 59*BSIZE+1, 0) != 59 * BSIZE+1){
         perror("lseek");
         exit(1);
     }
+	write(fsfd,&b,1);
+	
     return 1;
 }
 
