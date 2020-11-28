@@ -266,7 +266,9 @@ int check7(int fsfd){
                 err = 1;
                 return 1;
             }
-            address[inode1.addrs[j]] = 1;   //assigning the value one as an indication of being used
+            else if(inode1.addrs[j] != 0){
+                address[inode1.addrs[j]] = 1;   //assigning the value one as an indication of being used
+            }
         }
     }
     if(err == 1){
