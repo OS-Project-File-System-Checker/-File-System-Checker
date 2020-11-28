@@ -229,42 +229,7 @@ int check3(int fsfd){
 }
 
 int check4(int fsfd){
-    int err = 0;
-    
-    uchar buf[BSIZE];
-    rsect(SUPERBLOCK,buf);
-    memmove(&sb, buf, sizeof(sb));
-    
-    struct dinode inode1;
 
-    char *p = NULL; 
-    if ((p = mmap (NULL, FSSIZE*BSIZE, PROT_READ, MAP_PRIVATE, fsfd, 0)) == (void *) -1) {
-        perror ("mmap failed");
-        exit (EXIT_FAILURE);
-    }
-
-    for (int i = 1;i<=NINODE;i++){
-        rinode(i,&inode1);
-        if (inode1.type == 1){
-            struct dirent* dir = (struct dirent *)(p+ inode1.addrs[0]*BSIZE);
-            if ((strcmp(dir->name, ".")) != 0) {
-                printf("ERROR: directory not properly formatted : \".\"\n");          
-                err = 1;
-            }
-            if ((strcmp((dir + 1)->name, "..")) != 0) {
-                printf("ERROR: directory not properly formatted : \".\"\n");
-                err = 1;
-            }
-            if (dir->inum != i){
-                printf("ERROR: directory not properly formatted : \".\" -> inode: \"%d\"\n",i);
-                err = 1;
-            }
-        }
-    }
-    
-    if(err ==1){
-        return 1;
-    }
     return 0; // return 1 if error is detected
 }
 
@@ -301,9 +266,7 @@ int check7(int fsfd){
                 err = 1;
                 return 1;
             }
-            else if(inode1.addrs[j] != 0){
-                address[inode1.addrs[j]] = 1;   //assigning the value one as an indication of being used
-            }
+            address[inode1.addrs[j]] = 1;   //assigning the value one as an indication of being used
         }
     }
     if(err == 1){
@@ -497,13 +460,38 @@ int check10(int fsfd){
     return 0; 
 }
 
-
 int check11(int fsfd){
 
     return 0; // return 1 if error is detected
 }
 
 int check12(int fsfd){
+
+    struct dinode current_inode;
+    char buf[sizeof(struct dinode)];
+
+    for (int inum=0;inum<(int)sb.ninodes;inum++)
+    {
+        
+        if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+	    perror("lseek");
+        exit(1);
+	    }
+	
+        if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+            perror("read");
+            exit(1);
+        }
+        
+        memmove(&current_inode, buf, sizeof(current_inode));
+        
+        if(current_inode.type == T_DIR && current_inode.nlink > 1)
+        {
+            printf("ERROR: directory appears more than once in file system.\n");
+            close(fsfd);
+            return 1;
+        }
+    }
 
     return 0; // return 1 if error is detected
 }
