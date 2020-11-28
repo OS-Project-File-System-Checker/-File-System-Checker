@@ -500,15 +500,7 @@ int check9(int fsfd){
     for (int in=0; in<sb.ninodes; in++){indir[in]=0;}
     struct dinode current_inode;
     for (int inum=0; inum<sb.ninodes; inum++){	
-    if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
-	    perror("lseek");
-        exit(1);
-	}
-	if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
-	    perror("read");
-        exit(1);
-	}
-    memmove(&current_inode, buf, sizeof(current_inode));
+    rinode(inum,&current_inode);
     if (current_inode.type==T_DIR){
 		for(int x=0; x<NDIRECT; x++){
 			if(current_inode.addrs[x]!=0) {
@@ -542,16 +534,8 @@ int check9(int fsfd){
 				if(buf.inum!=inum){
 					indir[buf.inum]=1;//marking all directory entries present
 					}}}}}}}
-    for (int inum=0; inum<sb.ninodes; inum++){	
-    if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
-	    perror("lseek");
-        exit(1);
-	}
-	if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
-	    perror("read");
-        exit(1);
-	}
-    memmove(&current_inode, buf, sizeof(current_inode));
+    for (int inum=0; inum<sb.ninodes; inum++){
+    rinode(inum,&current_inode);
     if (current_inode.type!=0){
         if (indir[inum]==0 && inum!=1){
             printf("ERROR: inode marked use but not found in a directory.\n");
@@ -571,15 +555,7 @@ int check10(int fsfd){
     for (int in=0; in<sb.ninodes; in++){indir[in]=0;}
     struct dinode current_inode;
     for (int inum=0; inum<sb.ninodes; inum++){	
-    if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
-	    perror("lseek");
-        exit(1);
-	}
-	if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
-	    perror("read");
-        exit(1);
-	}
-    memmove(&current_inode, buf, sizeof(current_inode));
+    rinode(inum,&current_inode);
     if (current_inode.type==T_DIR){
 		for(int x=0; x<NDIRECT; x++){
 			if(current_inode.addrs[x]!=0) {
@@ -609,20 +585,14 @@ int check10(int fsfd){
 					exit(1);}
 				struct dirent buf;
 				for(int i=0;i<(BSIZE/sizeof(struct dirent));i++){ //loop thorugh all dir entries
-					read(fsfd, &buf, sizeof(struct dirent)); 
-				if(buf.inum!=inum){
-					indir[buf.inum]=1;//marking all directory entries present
-					}}}}}}}
-    for (int inum=0; inum<sb.ninodes; inum++){	
-    if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
-	    perror("lseek");
-        exit(1);
-	}
-	if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
-	    perror("read");
-        exit(1);
-	}
-    memmove(&current_inode, buf, sizeof(current_inode));
+					if (read(fsfd, &buf, sizeof(struct dirent))!=sizeof(struct dirent));{
+					perror("lseek");
+					exit(1);}
+                    if(buf.inum!=inum){
+                        indir[buf.inum]=1;//marking all directory entries present
+                        }}}}}}}
+    for (int inum=0; inum<sb.ninodes; inum++){
+    rinode(inum,&current_inode);
     if (indir[inum]==1){
         if (current_inode.type==0 && inum!=0){
             printf("ERROR: inode referred to in directory but marked free.\n");
