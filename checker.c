@@ -795,13 +795,21 @@ int check12(int fsfd){
 //////////////////////////////// Check Image ///////////////////////////////////////////
 
 int check_fsimage(int fsfd){
-    int total;
-    total = check1(fsfd)+check2(fsfd)+check3(fsfd)+check4(fsfd)+check5(fsfd)+check6(fsfd)+check7(fsfd)+check8(fsfd)+check9(fsfd)+check10(fsfd)+check11(fsfd)+check12(fsfd); 
+    int total = 0;
+    int flag = 0;
+    if(flag = check2(fsfd)){
+        total += flag;
+    }
+    else{
+        total = check1(fsfd)+check3(fsfd)+check4(fsfd)+check5(fsfd)+check6(fsfd)+check7(fsfd)+check8(fsfd)+check9(fsfd)+check10(fsfd)+check11(fsfd)+check12(fsfd);
+    }
+	
     if(total > 0){
         return 1;
     }
     else{
         printf("There are no errors in the file system image\n");
+        return 0;
     }
 }
 
