@@ -185,13 +185,32 @@ int err3(int fsfd){
 }
 
 int err4(int fsfd){
-    uint b = 10;
-	
-    if(lseek(fsfd, 59*BSIZE+1, 0) != 59 * BSIZE+1){
-        perror("lseek");
-        exit(1);
-    }
-	write(fsfd,&b,1);
+	uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
+    
+     if (lseek(fsfd, 59*BSIZE, SEEK_SET) != 59*BSIZE){
+		perror("lseek");
+		exit(1);
+	}
+
+	struct dirent buf1;
+	int i;
+
+	for(i=0; i<IPB; i++){
+		if(read(fsfd, &buf1, sizeof(struct dirent))!=sizeof(struct dirent)){
+			perror("read");
+			exit(1);
+		}
+
+		if(0==buf1.inum){ continue; }
+		if(strncmp(".", buf1.name, DIRSIZ)==0){
+			
+            memcpy(buf1.name,    "Paulo", 6);
+            printf("%s",buf1.name);
+            write(fsfd,&buf1,sizeof(buf1));
+		}
+	}
 	
     return 1;
 }
