@@ -229,7 +229,42 @@ int check3(int fsfd){
 }
 
 int check4(int fsfd){
+    int err = 0;
+    
+    uchar buf[BSIZE];
+    rsect(SUPERBLOCK,buf);
+    memmove(&sb, buf, sizeof(sb));
+    
+    struct dinode inode1;
 
+    char *p = NULL; 
+    if ((p = mmap (NULL, FSSIZE*BSIZE, PROT_READ, MAP_PRIVATE, fsfd, 0)) == (void *) -1) {
+        perror ("mmap failed");
+        exit (EXIT_FAILURE);
+    }
+
+    for (int i = 1;i<=NINODE;i++){
+        rinode(i,&inode1);
+        if (inode1.type == 1){
+            struct dirent* dir = (struct dirent *)(p+ inode1.addrs[0]*BSIZE);
+            if ((strcmp(dir->name, ".")) != 0) {
+                printf("ERROR: directory not properly formatted : \".\"\n");          
+                err = 1;
+            }
+            if ((strcmp((dir + 1)->name, "..")) != 0) {
+                printf("ERROR: directory not properly formatted : \".\"\n");
+                err = 1;
+            }
+            if (dir->inum != i){
+                printf("ERROR: directory not properly formatted : \".\" -> inode: \"%d\"\n",i);
+                err = 1;
+            }
+        }
+    }
+    
+    if(err ==1){
+        return 1;
+    }
     return 0; // return 1 if error is detected
 }
 
