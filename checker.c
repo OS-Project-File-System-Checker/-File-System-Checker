@@ -633,10 +633,161 @@ int check10(int fsfd){
     return 0; 
 }
 
+int check_direct_refs(struct dinode current_inode, int count, int inum) {   // Function to calculate the number of directories in the direct blocks of an inode  
+									    // which refer to a file
+    struct dirent dir;            
+
+    for(int i = 0; i <NDIRECT; i++)     // Iterating through all the direct blocks 
+    {
+        if(current_inode.addrs[i] != 0)
+        {
+
+            for(int j=0;j<BSIZE/sizeof(struct dirent);j++)  // Iterating through all the directory structures in a direct block
+            {
+                
+                if (lseek(fsfd, current_inode.addrs[i] * BSIZE + j*sizeof(struct dirent), SEEK_SET) != current_inode.addrs[i] * BSIZE + j*sizeof(struct dirent)){  //move to correct location
+                    perror("lseek");
+                    exit(1);
+                }
+
+                if(read(fsfd, &dir, sizeof(struct dirent))!=sizeof(struct dirent)){	//read directory entry info into buffer
+                    perror("read");
+                    exit(1);
+                }
+    
+                if(dir.inum == inum)    // If there is a matching inode number, increment the no. of direct refs
+                {                       // of that direct block by 1 and proceed to next direct block
+                    count += 1;
+                    break;
+                }            
+            }
+            
+        }
+        
+    }
+
+    return count;    
+
+}
+
+int check_indirect_refs(struct dinode current_inode, int count, int inum) {	// Function to calculate the number of directories in the indirect blocks of an inode  
+									    	// which refer to a file
+    struct dirent dir;
+
+    uint current_address;
+
+    if(current_inode.addrs[NDIRECT] != 0)   // If there is a reference to indirect block, proceed
+    {
+        for(int i = 0; i <NINDIRECT; i++)   // Iterating through addresses in the indirect block
+        {
+            if (lseek(fsfd, current_inode.addrs[NDIRECT] * BSIZE + i * sizeof(uint), SEEK_SET) != current_inode.addrs[NDIRECT] * BSIZE + i * sizeof(uint)){  //move to correct location
+                perror("lseek");
+                exit(1);
+            }
+
+            read(fsfd, &current_address, sizeof(uint));
+    
+            if(read(fsfd, &current_address, sizeof(uint))!=sizeof(uint)){	//read address of the indirect block into buffer
+                perror("read");
+                exit(1);
+            }
+            
+            if( current_address != 0)   
+            {
+                for(int j=0;j<BSIZE/sizeof(struct dirent);j++)  // Iterating through all the directory structures in the indirect block
+                {                    
+                    if (lseek(fsfd, current_inode.addrs[i] * BSIZE + j*sizeof(struct dirent), SEEK_SET) != current_inode.addrs[i] * BSIZE + j*sizeof(struct dirent)){  //move to correct location
+                        perror("lseek");
+                        exit(1);
+                    }
+
+                    if(read(fsfd, &dir, sizeof(struct dirent))!=sizeof(struct dirent)){	//read directory entry info into buffer
+                        perror("read");
+                        exit(1);
+                    }
+        
+                    if(dir.inum == inum)    // If there is a matching inode number, increment the no. of refs
+                    {                       // of that indirect block by 1 and proceed to next indirect block
+                        count += 1;
+                        break;
+                    }            
+                }
+                
+            }
+            
+        }
+    }
+
+    return count;
+}
+
+int total_num_ref(uint current_inum) //
+{
+    int count = 0;
+    struct dinode current_inode;
+
+    for(int inum = 0; inum < sb.ninodes; inum++)
+    {       
+        if (inum != current_inum) {
+        
+            if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+                perror("lseek");
+                exit(1);
+            }
+        
+            if(read(fsfd, &current_inode, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+                perror("read");
+                exit(1);
+            }
+            
+            if (current_inode.type == T_DIR) {
+
+                // Updating the number of refs by checking the direct and indirect blocks of the current inode
+
+                count = check_direct_refs(current_inode, count, current_inum);    
+
+                count = check_indirect_refs(current_inode, count, current_inum);
+            }        
+        }        
+    }
+
+    return count;
+}
+
 int check11(int fsfd){
+
+    struct dinode current_inode;
+    char buf[sizeof(struct dinode)];
+    
+    for (int inum=0;inum<(int)sb.ninodes;inum++)
+    {
+        
+        if (lseek(fsfd, sb.inodestart * BSIZE + inum * sizeof(struct dinode), SEEK_SET) != sb.inodestart * BSIZE + inum * sizeof(struct dinode)){  //move to correct location
+	    perror("lseek");
+        exit(1);
+	    }
+	
+        if(read(fsfd, buf, sizeof(struct dinode))!=sizeof(struct dinode)){	//read inode info into buffer
+            perror("read");
+            exit(1);
+        }
+        
+        memmove(&current_inode, buf, sizeof(current_inode));
+
+        if(current_inode.type == T_FILE && current_inode.nlink != total_num_ref(current_inode, inum))
+        {
+
+            printf("ERROR: bad reference count for file.");
+            close(fsfd);
+            return 1;
+        
+        }
+
+    }
 
     return 0; // return 1 if error is detected
 }
+
 
 int check12(int fsfd){
 
